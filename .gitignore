@@ -2,4 +2,9 @@ venv/
 __pycache__/
 *.pyc
 .env
-.DS_Store 
+.DS_Store
+*.so
+*.so.*
+*.dylib
+*.dll
+*.pyd 
