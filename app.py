@@ -136,6 +136,8 @@ st.markdown("""
         letter-spacing: 0.05em;
         margin: 0;
         line-height: 1.2;
+        white-space: nowrap;
+        width: 100%;
     }
 
     /* Navegação */
@@ -415,11 +417,11 @@ with st.sidebar:
         <div class="metrics-grid">
             <div class="metric-card">
                 <div class="metric-value">{}</div>
-                <div class="metric-label">Estudados</div>
+                <div class="metric-label">ESTUDADOS</div>
             </div>
             <div class="metric-card">
                 <div class="metric-value">{}</div>
-                <div class="metric-label">Notas</div>
+                <div class="metric-label">NOTAS</div>
             </div>
         </div>
     """.format(stats['items_studied'], stats['notes_count']), unsafe_allow_html=True)
