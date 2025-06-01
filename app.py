@@ -99,45 +99,36 @@ st.markdown("""
     /* Métricas */
     .metrics-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, minmax(140px, 1fr));
         gap: 0.75rem;
         margin: 1rem 0;
-        padding: 0.5rem;
     }
 
     .metric-card {
         background: var(--surface);
-        padding: 1rem;
-        border-radius: 12px;
+        padding: 0.75rem;
+        border-radius: 8px;
         border: 1px solid var(--border);
         text-align: center;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        min-width: 120px;
-        height: 100px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        min-height: 80px;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        align-items: center;
     }
 
     .metric-value {
-        font-size: 1.75rem;
+        font-size: 1.5rem;
         font-weight: 600;
         color: var(--primary);
-        margin-bottom: 0.5rem;
-        line-height: 1;
+        margin-bottom: 4px;
     }
 
     .metric-label {
-        font-size: 0.875rem;
+        font-size: 0.75rem;
         color: var(--text-secondary);
         text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin: 0;
-        line-height: 1.2;
-        white-space: nowrap;
-        width: 100%;
+        letter-spacing: 0.025em;
     }
 
     /* Navegação */
@@ -416,12 +407,12 @@ with st.sidebar:
     st.markdown("""
         <div class="metrics-grid">
             <div class="metric-card">
-                <div class="metric-value">{}</div>
-                <div class="metric-label">ESTUDADOS</div>
+                <span class="metric-value">{}</span>
+                <span class="metric-label">ESTUDADOS</span>
             </div>
             <div class="metric-card">
-                <div class="metric-value">{}</div>
-                <div class="metric-label">NOTAS</div>
+                <span class="metric-value">{}</span>
+                <span class="metric-label">NOTAS</span>
             </div>
         </div>
     """.format(stats['items_studied'], stats['notes_count']), unsafe_allow_html=True)
