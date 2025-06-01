@@ -15,13 +15,16 @@ class UserManager:
     def _init_files(self):
         """Inicializa os arquivos de dados se não existirem."""
         if not self.stats_file.exists():
-            self._save_stats({
+            initial_stats = {
                 "total_study_time": 0,
                 "items_studied": 0,
                 "correct_answers": 0,
                 "total_answers": 0,
-                "last_session": None
-            })
+                "last_session": None,
+                "notes_count": 0,
+                "favorites_count": 0
+            }
+            self._save_stats(initial_stats)
             
         if not self.notes_file.exists():
             self._save_notes({})
@@ -91,14 +94,26 @@ class UserManager:
     
     def get_statistics(self):
         """Retorna as estatísticas do usuário."""
-        stats = self._load_stats()
-        notes = self._load_notes()
-        favorites = self._load_favorites()
-        
-        return {
-            "total_study_time": stats["total_study_time"],
-            "items_studied": stats["items_studied"],
-            "average_score": stats["correct_answers"] / max(stats["total_answers"], 1),
-            "notes_count": sum(len(notes_list) for notes_list in notes.values()),
-            "favorites_count": len(favorites)
-        } 
+        try:
+            stats = self._load_stats()
+            notes = self._load_notes()
+            favorites = self._load_favorites()
+            
+            return {
+                "total_study_time": stats.get("total_study_time", 0),
+                "items_studied": stats.get("items_studied", 0),
+                "correct_answers": stats.get("correct_answers", 0),
+                "total_answers": stats.get("total_answers", 1),
+                "notes_count": sum(len(notes_list) for notes_list in notes.values()),
+                "favorites_count": len(favorites)
+            }
+        except Exception as e:
+            print(f"Erro ao carregar estatísticas: {e}")
+            return {
+                "total_study_time": 0,
+                "items_studied": 0,
+                "correct_answers": 0,
+                "total_answers": 0,
+                "notes_count": 0,
+                "favorites_count": 0
+            } 

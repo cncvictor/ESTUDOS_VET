@@ -100,33 +100,33 @@ st.markdown("""
     .metrics-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
-        margin-bottom: 2rem;
+        gap: 0.75rem;
+        margin: 1rem 0;
+        padding: 0.5rem;
     }
 
     .metric-card {
         background: var(--surface);
-        padding: 1.5rem;
-        border-radius: 16px;
+        padding: 1rem;
+        border-radius: 12px;
         border: 1px solid var(--border);
         text-align: center;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-
-    .metric-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 12px -1px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        min-width: 120px;
+        height: 100px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
 
     .metric-value {
-        font-size: 2rem;
-        font-weight: 700;
-        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        line-height: 1;
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--primary);
         margin-bottom: 0.5rem;
+        line-height: 1;
     }
 
     .metric-label {
@@ -134,6 +134,8 @@ st.markdown("""
         color: var(--text-secondary);
         text-transform: uppercase;
         letter-spacing: 0.05em;
+        margin: 0;
+        line-height: 1.2;
     }
 
     /* Navegação */
@@ -412,12 +414,12 @@ with st.sidebar:
     st.markdown("""
         <div class="metrics-grid">
             <div class="metric-card">
-                <p class="metric-value">{}</p>
-                <p class="metric-label">Estudados</p>
+                <div class="metric-value">{}</div>
+                <div class="metric-label">Estudados</div>
             </div>
             <div class="metric-card">
-                <p class="metric-value">{}</p>
-                <p class="metric-label">Notas</p>
+                <div class="metric-value">{}</div>
+                <div class="metric-label">Notas</div>
             </div>
         </div>
     """.format(stats['items_studied'], stats['notes_count']), unsafe_allow_html=True)
