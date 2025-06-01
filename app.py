@@ -3,77 +3,285 @@ import os
 import markdown
 from pathlib import Path
 import random
+from user_management import UserManager
+from calculators import render_calculator_interface
+from access_log import AccessLogger
 
 # Configuração da página
 st.set_page_config(
-    page_title="Resumos de Anestesiologia",
-    page_icon="💉",
+    page_title="Anestesiologia Veterinária",
+    page_icon="🐾",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
+# Função para ler arquivos markdown
+def read_markdown_file(file_path):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            return file.read()
+    except Exception as e:
+        st.error(f"Erro ao ler arquivo {file_path}: {str(e)}")
+        return ""
+
+# Inicializar logger e gerenciador de usuário
+logger = AccessLogger()
+user_manager = UserManager()
+
+# Registrar acesso
+if "logged_access" not in st.session_state:
+    try:
+        ip = st.query_params.get("client_ip", ["não identificado"])[0]
+    except:
+        ip = "não identificado"
+    
+    logger.log_access(
+        ip=ip,
+        page=st.query_params.get("page", ["principal"])[0]
+    )
+    st.session_state.logged_access = True
+
 # Estilo personalizado
 st.markdown("""
     <style>
-    .main {
+    /* Cores e Variáveis */
+    :root {
+        --primary: #3B82F6;
+        --primary-dark: #1E40AF;
+        --secondary: #10B981;
+        --accent: #8B5CF6;
+        --background: #F9FAFB;
+        --surface: #FFFFFF;
+        --text: #111827;
+        --text-secondary: #4B5563;
+        --border: #E5E7EB;
+    }
+
+    /* Reset e Estilos Gerais */
+    .stApp {
+        background: var(--background);
+    }
+
+    /* Sidebar */
+    section[data-testid="stSidebar"] {
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+    }
+
+    section[data-testid="stSidebar"] .block-container {
         padding: 2rem;
     }
-    .stMarkdown {
-        text-align: justify;
-        font-size: 1.1rem;
-        line-height: 1.6;
+
+    /* Header */
+    .app-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.5rem;
+        margin: -2rem -2rem 2rem -2rem;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        color: white;
     }
-    h1 {
-        color: #1E3A8A;
-        margin-bottom: 1rem;
+
+    .app-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: white;
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    .app-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.875rem;
+    }
+
+    /* Métricas */
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .metric-card {
+        background: var(--surface);
+        padding: 1.5rem;
+        border-radius: 16px;
+        border: 1px solid var(--border);
         text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
-    h2 {
-        color: #2563EB;
-        margin-top: 1.5rem;
-        padding: 0.5rem;
-        background: #F0F7FF;
-        border-radius: 5px;
+
+    .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 12px -1px rgba(0, 0, 0, 0.15);
     }
-    h3 {
-        color: #3B82F6;
-        margin-top: 1rem;
+
+    .metric-value {
+        font-size: 2rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        line-height: 1;
+        margin-bottom: 0.5rem;
     }
+
+    .metric-label {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    /* Navegação */
+    .nav-section {
+        background: #F3F4F6;
+        padding: 1.5rem;
+        border-radius: 16px;
+        margin-bottom: 1.5rem;
+    }
+
+    .nav-section h3 {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    /* Radio Buttons */
+    .stRadio > div {
+        background: transparent;
+    }
+
+    .stRadio [role="radio"] {
+        padding: 1rem 1.25rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        margin: 0.5rem 0;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    .stRadio [role="radio"]:hover {
+        border-color: var(--primary);
+        background: #F8FAFC;
+    }
+
+    .stRadio [aria-checked="true"] {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        border: none;
+        color: white;
+        font-weight: 500;
+    }
+
+    /* Botões */
     .stButton button {
         width: 100%;
-        padding: 0.5rem;
-        margin: 0.2rem 0;
-        border-radius: 5px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        color: var(--text);
+        font-size: 0.875rem;
+        padding: 1rem 1.25rem;
+        transition: all 0.2s ease;
+        margin: 0.25rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     }
+
     .stButton button:hover {
-        background-color: #1E40AF;
-    }
-    .css-1d391kg {
-        padding: 1rem;
-    }
-    .block-container {
-        padding: 2rem;
-    }
-    .card {
-        padding: 2rem;
-        border-radius: 10px;
+        border-color: var(--primary);
         background: #F8FAFC;
+        transform: translateY(-1px);
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        margin: 1rem 0;
     }
-    .case-study {
-        background: #EFF6FF;
+
+    .stButton button[kind="secondary"] {
+        background: var(--surface);
+        text-align: left;
+        justify-content: flex-start;
+    }
+
+    .stButton button[kind="secondary"]:hover {
+        border-color: var(--primary);
+        background: #F8FAFC;
+    }
+
+    /* Cards */
+    .content-card {
+        background: var(--surface);
         padding: 1.5rem;
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    }
+
+    .content-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .content-card h3 {
+        color: var(--text);
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Tabs */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .stTabs [role="tab"] {
+        background: var(--surface);
+        border: 1px solid var(--border);
         border-radius: 8px;
-        margin: 1rem 0;
-        border-left: 4px solid #2563EB;
+        color: var(--text);
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .stTabs [role="tab"][aria-selected="true"] {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        border: none;
+        color: white;
+    }
+
+    /* Campo de Busca */
+    .stTextInput input {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        font-size: 0.875rem;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    .stTextInput input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Progress Bar */
+    .stProgress > div > div {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
     }
     </style>
-    """, unsafe_allow_html=True)
-
-def read_markdown_file(file_path):
-    with open(file_path, 'r', encoding='utf-8') as file:
-        return file.read()
+""", unsafe_allow_html=True)
 
 def extract_flash_cards(content):
     lines = content.split('\n')
@@ -188,38 +396,97 @@ st.title("📚 Banco de Estudos - Anestesiologia")
 
 # Barra lateral
 with st.sidebar:
-    st.title("Navegação")
+    # Logo e título
+    st.markdown("""
+        <div class="app-header">
+            <span style="font-size: 28px;">🐾</span>
+            <div>
+                <h1 class="app-title">Anestesiologia</h1>
+                <span class="app-subtitle">Medicina Veterinária</span>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
     
-    # Modos principais
+    # Métricas
+    stats = user_manager.get_statistics()
+    st.markdown("""
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <p class="metric-value">{}</p>
+                <p class="metric-label">Estudados</p>
+            </div>
+            <div class="metric-card">
+                <p class="metric-value">{}</p>
+                <p class="metric-label">Notas</p>
+            </div>
+        </div>
+    """.format(stats['items_studied'], stats['notes_count']), unsafe_allow_html=True)
+    
+    # Navegação
+    st.markdown('<div class="nav-section">', unsafe_allow_html=True)
+    st.markdown("### MODO DE ESTUDO")
     main_mode = st.radio(
-        "Modo de Estudo:",
-        ["📖 Leitura Normal", "🎴 Flash Cards", "🏥 Casos Clínicos"],
-        key="main_mode"
+        "",
+        ["📚 Material", "🧠 Flash Cards", "🏥 Casos", "💊 Calculadoras"],
+        key="main_mode",
+        label_visibility="collapsed"
     )
-    
-    if main_mode == "🎴 Flash Cards":
-        st.markdown("### Opções de Flash Cards")
-        card_mode = st.radio(
-            "Tipo de Estudo:",
-            ["Sequencial", "Aleatório"],
-            key="card_mode"
-        )
-        show_answer = st.checkbox("Mostrar Resposta", key="show_answer_sidebar")
-    
-    elif main_mode == "🏥 Casos Clínicos":
-        st.markdown("### Opções de Casos")
-        case_mode = st.radio(
-            "Visualização:",
-            ["Lista Completa", "Caso por Caso"],
-            key="case_mode"
-        )
+    st.markdown('</div>', unsafe_allow_html=True)
     
     # Campo de busca
-    search = st.text_input("🔍 Buscar...", key="search_input")
+    st.markdown('<div class="nav-section">', unsafe_allow_html=True)
+    st.markdown("### PESQUISAR")
+    search = st.text_input("", placeholder="Buscar conteúdo...", key="search_input", label_visibility="collapsed")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Estatísticas de Acesso
+    st.markdown('<div class="nav-section">', unsafe_allow_html=True)
+    st.markdown("### ESTATÍSTICAS DE ACESSO")
+    
+    stats = logger.get_access_stats()
+    
+    # Informações gerais
+    st.markdown(f"""
+        <div style='font-size: 0.9em; color: var(--text-secondary);'>
+            <p>👥 Visitantes únicos: {stats['ips_unicos']}</p>
+            <p>📊 Total de acessos: {stats['total_acessos']}</p>
+            <p>📅 Acessos hoje: {stats['acessos_hoje']}</p>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # Último acesso
+    if stats['ultimo_acesso']:
+        st.markdown("#### Último Acesso")
+        st.markdown(f"""
+            <div style='font-size: 0.9em; color: var(--text-secondary); background: var(--surface); padding: 0.8rem; border-radius: 8px; margin-top: 0.5rem;'>
+                <p>🌐 IP: {stats['ultimo_acesso']['ip']}</p>
+                <p>🕒 Horário: {stats['ultimo_acesso']['horario']}</p>
+            </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # Conteúdo principal
-if main_mode == "🎴 Flash Cards":
-    st.markdown("## 🎴 Modo Flash Cards")
+if main_mode == "💊 Calculadoras":
+    st.markdown("""
+        <div class="content-card">
+            <h3>💊 Calculadoras Anestésicas</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                Ferramentas essenciais para cálculos precisos em anestesiologia veterinária
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+    render_calculator_interface()
+
+elif main_mode == "🧠 Flash Cards":
+    st.markdown("""
+        <div class="content-card">
+            <h3>🧠 Flash Cards</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                Revise conceitos importantes de anestesiologia veterinária
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
     
     # Carregar flash cards
     all_cards = []
@@ -232,46 +499,69 @@ if main_mode == "🎴 Flash Cards":
             all_cards.extend(cards)
     
     if all_cards:
-        # Inicializar o índice do card na primeira vez
+        # Inicializar o índice do card
         if "current_card_idx" not in st.session_state:
             st.session_state.current_card_idx = 0
         
-        # Controles de navegação
-        col1, col2, col3, col4 = st.columns([1, 1, 1, 2])
+        # Controles de navegação em container estilizado
+        st.markdown("""
+            <div class="content-card" style="display: flex; gap: 1rem; align-items: center; justify-content: space-between;">
+        """, unsafe_allow_html=True)
         
-        with col1:
-            if st.button("⬅️ Anterior", key="btn_anterior"):
+        cols = st.columns([1, 1, 1, 2])
+        with cols[0]:
+            if st.button("⬅️", key="btn_anterior", help="Anterior", use_container_width=True):
                 st.session_state.current_card_idx = max(0, st.session_state.current_card_idx - 1)
-        
-        with col2:
-            if st.button("➡️ Próximo", key="btn_proximo"):
+        with cols[1]:
+            if st.button("➡️", key="btn_proximo", help="Próximo", use_container_width=True):
                 st.session_state.current_card_idx = min(len(all_cards) - 1, st.session_state.current_card_idx + 1)
-        
-        with col3:
-            if st.button("🔄 Aleatório", key="btn_aleatorio"):
+        with cols[2]:
+            if st.button("🔄", key="btn_aleatorio", help="Aleatório", use_container_width=True):
                 st.session_state.current_card_idx = random.randint(0, len(all_cards) - 1)
         
-        # Mostrar progresso
+        st.markdown("</div>", unsafe_allow_html=True)
+        
+        # Progresso
         st.progress((st.session_state.current_card_idx + 1) / len(all_cards))
-        st.markdown(f"Card {st.session_state.current_card_idx + 1} de {len(all_cards)}")
+        st.markdown(f"""
+            <p style="color: var(--text-secondary); font-size: 0.875rem; text-align: center; margin: 1rem 0;">
+                Card {st.session_state.current_card_idx + 1} de {len(all_cards)}
+            </p>
+        """, unsafe_allow_html=True)
         
-        # Exibir card atual
+        # Card atual
         current_card = all_cards[st.session_state.current_card_idx]
+        st.markdown("""
+            <div class="content-card">
+                <h3>📝 Questão</h3>
+                <div style="background: #F3F4F6; padding: 1.5rem; border-radius: 12px; color: var(--text); margin: 1rem 0;">
+                    {}
+                </div>
+            </div>
+        """.format(current_card["question"]), unsafe_allow_html=True)
         
-        st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.markdown("### 📝 Questão:")
-        st.info(current_card["question"])
-        
-        # Botão para mostrar/ocultar resposta
-        if st.button("👀 Mostrar Resposta", key=f"show_answer_{st.session_state.current_card_idx}"):
-            st.markdown("### ✅ Resposta:")
-            st.success(current_card["answer"])
-        st.markdown('</div>', unsafe_allow_html=True)
+        if st.button("👀 Mostrar Resposta", key=f"show_answer_{st.session_state.current_card_idx}", use_container_width=True):
+            st.markdown("""
+                <div class="content-card">
+                    <h3>✅ Resposta</h3>
+                    <div style="background: #ECFDF5; padding: 1.5rem; border-radius: 12px; color: var(--text); margin: 1rem 0;">
+                        {}
+                    </div>
+                </div>
+            """.format(current_card["answer"]), unsafe_allow_html=True)
+            user_manager.track_progress(f"card_{st.session_state.current_card_idx}")
     else:
-        st.warning("Nenhum flash card encontrado. Verifique o arquivo FlashCards_Anestesiologia.md")
+        st.warning("Nenhum flash card encontrado.")
 
-elif main_mode == "🏥 Casos Clínicos":
-    st.markdown("## 🏥 Casos Clínicos")
+elif main_mode == "🏥 Casos":
+    st.markdown("""
+        <div class="content-card">
+            <h3>🏥 Casos Clínicos</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                Estude casos reais de anestesiologia veterinária
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
     
     # Carregar casos clínicos
     all_cases = []
@@ -334,13 +624,33 @@ elif main_mode == "🏥 Casos Clínicos":
             for item in current_case["justification"]:
                 st.markdown(f"- {item}")
         
+        # Adicionar opção de fazer anotações
+        if st.button("📝 Adicionar Nota", key=f"add_note_{st.session_state.current_case_idx}"):
+            note = st.text_area("Sua anotação:")
+            if note:
+                user_manager.add_note(f"case_{st.session_state.current_case_idx}", note)
+                st.success("Nota adicionada com sucesso!")
+        
         st.markdown('</div>', unsafe_allow_html=True)
     else:
         st.warning("Nenhum caso clínico encontrado. Verifique o arquivo Casos_Clinicos_ENADE.md")
 
-else:  # Modo Leitura Normal
+else:  # Material de Estudo
+    st.markdown("""
+        <div class="content-card">
+            <h3>📚 Material de Estudo</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                Conteúdo completo de anestesiologia veterinária
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+    
     for section_idx, (section, categories) in enumerate(CONTENT_STRUCTURE.items()):
-        st.markdown(f"## {section}")
+        st.markdown(f"""
+            <div class="content-card">
+                <h3>{section}</h3>
+            </div>
+        """, unsafe_allow_html=True)
         
         tabs = st.tabs([cat for cat in categories.keys()])
         
@@ -358,20 +668,32 @@ else:  # Modo Leitura Normal
                 for idx, file in enumerate(files):
                     with cols[idx % 2]:
                         title = file.replace('.md', '').replace('_', ' ')
-                        if st.button(f"📄 {title}", key=f"btn_{section_idx}_{tab_idx}_{idx}"):
+                        if st.button(
+                            f"📄 {title}",
+                            key=f"btn_{section_idx}_{tab_idx}_{idx}",
+                            use_container_width=True,
+                            type="secondary"
+                        ):
                             st.session_state.current_file = file
                             st.session_state.show_content = True
                 
                 if 'current_file' in st.session_state and st.session_state.get('show_content', False):
-                    st.markdown("---")
                     content = read_markdown_file(st.session_state.current_file)
-                    st.markdown(content)
-
-# Rodapé com estatísticas
-st.sidebar.markdown("---")
-st.sidebar.markdown("### 📊 Estatísticas")
-total_files = sum(len(files) for categories in CONTENT_STRUCTURE.values() for files in categories.values())
-total_categories = sum(len(categories) for categories in CONTENT_STRUCTURE.values())
-st.sidebar.markdown(f"- Arquivos: **{total_files}**")
-st.sidebar.markdown(f"- Categorias: **{total_categories}**")
-st.sidebar.markdown(f"- Seções: **{len(CONTENT_STRUCTURE)}**") 
+                    st.markdown("""
+                        <div class="content-card">
+                            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                                <button class="favorite-btn">⭐</button>
+                                <h3 style="margin: 0;">{}</h3>
+                            </div>
+                            <div style="color: var(--text);">
+                                {}
+                            </div>
+                        </div>
+                    """.format(
+                        st.session_state.current_file.replace('.md', '').replace('_', ' '),
+                        content
+                    ), unsafe_allow_html=True)
+                    
+                    if st.button("⭐", key=f"fav_{section_idx}_{tab_idx}", help="Favoritar"):
+                        user_manager.toggle_favorite(f"section_{section_idx}_{tab_idx}")
+                        st.success("Status de favorito atualizado!") 
