@@ -359,6 +359,9 @@ def extract_clinical_cases(content):
 
 # Estrutura do conteúdo
 CONTENT_STRUCTURE = {
+    "📖 Apostila Completa": {
+        "Apostila de Anestesiologia": ["Apostila_Anestesiologia.md"],
+    },
     "📚 Material Base": {
         "Anestésicos Gerais": ["Anestesicos_Gerais.md", "Anestesicos_Gerais_IV.md", "Anestesia_Inalatoria.md"],
         "Anestésicos Locais": ["Anestesicos_Locais.md", "Anestesicos_Locais_Detalhado.md", "Anestesia_Local_Intravenosa.md"],
