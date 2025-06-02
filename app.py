@@ -44,12 +44,9 @@ if "logged_access" not in st.session_state:
 # Estilo personalizado
 st.markdown("""
     <style>
-    /* Cores e Variáveis */
+    /* Reset e Variáveis */
     :root {
         --primary: #3B82F6;
-        --primary-dark: #1E40AF;
-        --secondary: #10B981;
-        --accent: #8B5CF6;
         --background: #F9FAFB;
         --surface: #FFFFFF;
         --text: #111827;
@@ -57,49 +54,43 @@ st.markdown("""
         --border: #E5E7EB;
     }
 
-    /* Reset e Estilos Gerais */
+    /* Estilos Globais */
     .stApp {
-        background: var(--background);
+        background: var(--background) !important;
     }
 
     /* Sidebar */
     section[data-testid="stSidebar"] {
-        background: var(--surface);
+        background: var(--surface) !important;
         border-right: 1px solid var(--border);
-    }
-
-    section[data-testid="stSidebar"] .block-container {
-        padding: 2rem;
+        -webkit-box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+        -moz-box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+        box-shadow: 2px 0 5px rgba(0,0,0,0.05);
     }
 
     /* Header */
     .app-header {
+        display: -webkit-flex;
+        display: -moz-flex;
+        display: -ms-flex;
         display: flex;
+        -webkit-align-items: center;
+        -moz-align-items: center;
+        -ms-align-items: center;
         align-items: center;
         gap: 1rem;
-        padding: 1.5rem;
-        margin: -2rem -2rem 2rem -2rem;
-        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        padding: 1rem;
+        background: var(--primary);
         color: white;
-    }
-
-    .app-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: white;
-        margin: 0;
-        line-height: 1.2;
-    }
-
-    .app-subtitle {
-        color: rgba(255, 255, 255, 0.9);
-        font-size: 0.875rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
     }
 
     /* Métricas */
     .metrics-grid {
+        display: -ms-grid;
         display: grid;
-        grid-template-columns: repeat(2, minmax(140px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
         gap: 0.75rem;
         margin: 1rem 0;
     }
@@ -108,172 +99,93 @@ st.markdown("""
         background: var(--surface);
         padding: 0.75rem;
         border-radius: 8px;
-        border: 1px solid var(--border);
         text-align: center;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-        min-height: 80px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-
-    .metric-value {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: var(--primary);
-        margin-bottom: 4px;
-    }
-
-    .metric-label {
-        font-size: 0.75rem;
-        color: var(--text-secondary);
-        text-transform: uppercase;
-        letter-spacing: 0.025em;
+        -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        -moz-box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
 
     /* Navegação */
     .nav-section {
         background: #F3F4F6;
-        padding: 1.5rem;
-        border-radius: 16px;
-        margin-bottom: 1.5rem;
-    }
-
-    .nav-section h3 {
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: var(--text-secondary);
+        padding: 1rem;
+        border-radius: 8px;
         margin-bottom: 1rem;
-        font-weight: 600;
+        -webkit-transition: all 0.3s ease;
+        -moz-transition: all 0.3s ease;
+        transition: all 0.3s ease;
     }
 
-    /* Radio Buttons */
-    .stRadio > div {
-        background: transparent;
-    }
-
-    .stRadio [role="radio"] {
-        padding: 1rem 1.25rem;
+    /* Conteúdo */
+    .content-section {
         background: var(--surface);
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
         border: 1px solid var(--border);
+        -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        -moz-box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    /* Modal */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        -webkit-backdrop-filter: blur(5px);
+        backdrop-filter: blur(5px);
+    }
+
+    .modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        -webkit-transform: translate(-50%, -50%);
+        -moz-transform: translate(-50%, -50%);
+        background: var(--surface);
+        padding: 2rem;
         border-radius: 12px;
-        margin: 0.5rem 0;
-        transition: all 0.2s ease;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        width: 90%;
+        max-width: 800px;
+        max-height: 90vh;
+        overflow-y: auto;
+        z-index: 1001;
+        -webkit-box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        -moz-box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
-    .stRadio [role="radio"]:hover {
-        border-color: var(--primary);
-        background: #F8FAFC;
-    }
-
-    .stRadio [aria-checked="true"] {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-        border: none;
-        color: white;
-        font-weight: 500;
+    /* Responsividade */
+    @media (max-width: 768px) {
+        .metrics-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .modal {
+            width: 95%;
+            padding: 1rem;
+        }
     }
 
     /* Botões */
-    .stButton button {
+    .stButton > button {
         width: 100%;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        color: var(--text);
-        font-size: 0.875rem;
-        padding: 1rem 1.25rem;
+        border-radius: 6px;
+        -webkit-transition: all 0.2s ease;
+        -moz-transition: all 0.2s ease;
         transition: all 0.2s ease;
-        margin: 0.25rem 0;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     }
 
-    .stButton button:hover {
-        border-color: var(--primary);
-        background: #F8FAFC;
+    .stButton > button:hover {
+        -webkit-transform: translateY(-1px);
+        -moz-transform: translateY(-1px);
         transform: translateY(-1px);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-
-    .stButton button[kind="secondary"] {
-        background: var(--surface);
-        text-align: left;
-        justify-content: flex-start;
-    }
-
-    .stButton button[kind="secondary"]:hover {
-        border-color: var(--primary);
-        background: #F8FAFC;
-    }
-
-    /* Cards */
-    .content-card {
-        background: var(--surface);
-        padding: 1.5rem;
-        border-radius: 16px;
-        border: 1px solid var(--border);
-        margin-bottom: 1rem;
-        transition: all 0.3s ease;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-    }
-
-    .content-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-
-    .content-card h3 {
-        color: var(--text);
-        font-size: 1.25rem;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    /* Tabs */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-    }
-
-    .stTabs [role="tab"] {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        color: var(--text);
-        padding: 0.75rem 1rem;
-        font-size: 0.875rem;
-    }
-
-    .stTabs [role="tab"][aria-selected="true"] {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-        border: none;
-        color: white;
-    }
-
-    /* Campo de Busca */
-    .stTextInput input {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 1rem 1.25rem;
-        font-size: 0.875rem;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    }
-
-    .stTextInput input:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    /* Progress Bar */
-    .stProgress > div > div {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
     }
     </style>
 """, unsafe_allow_html=True)
@@ -363,14 +275,15 @@ CONTENT_STRUCTURE = {
         "Apostila de Anestesiologia": ["Apostila_Anestesiologia.md"],
     },
     "📚 Material Base": {
-        "Anestésicos Gerais": ["Anestesicos_Gerais.md", "Anestesicos_Gerais_IV.md", "Anestesia_Inalatoria.md"],
+        "Anestésicos Gerais": ["Anestesicos_Gerais.md", "Anestesicos_Gerais_IV.md", "Anestesia_Inalatoria.md", "EGG_Anestesico.md"],
         "Anestésicos Locais": ["Anestesicos_Locais.md", "Anestesicos_Locais_Detalhado.md", "Anestesia_Local_Intravenosa.md"],
         "Medicação Pré-Anestésica": ["Medicacao_Pre_Anestesica.md", "MPA_Completo.md", "Hipnoanalgesicos_MPA.md", "MPA_Fenotiazinicos_Benzodiazepinicos.md"],
     },
     "💊 Farmacologia": {
         "Analgésicos": ["Analgesia_Opioides.md", "Opioides.md", "AINES.md", "Analgesia_AINEs.md"],
         "Adjuvantes": ["Adjuvantes_Analgesicos.md", "Alfa2_Agonistas.md", "Gabapentina.md"],
-        "Outros Fármacos": ["Anticolinergicos.md", "Bloqueadores_Adrenergicos.md", "Farmacos_Simpaticos.md", "Farmacos_Parassimpaticos.md"]
+        "Outros Fármacos": ["Anticolinergicos.md", "Bloqueadores_Adrenergicos.md", "Farmacos_Simpaticos.md", "Farmacos_Parassimpaticos.md"],
+        "Antibióticos": ["Antibioticos_Veterinaria.md"]
     },
     "🔬 Procedimentos": {
         "Técnicas Anestésicas": ["Tecnicas_Protocolos_Anestesicos.md", "Anestesia_Dissociativa.md", "TIVA.md"],
@@ -390,7 +303,15 @@ CONTENT_STRUCTURE = {
 }
 
 # Título principal
-st.title("📚 Banco de Estudos - Anestesiologia")
+st.markdown("""
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--surface); border-radius: 8px; margin-bottom: 2rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);">
+        <h1 style="margin: 0;">📚 Banco de Estudos - Anestesiologia</h1>
+        <div style="display: flex; gap: 1rem;">
+            <button class="nav-button" onclick="window.history.back()">⬅️ Voltar</button>
+            <button class="nav-button" onclick="location.reload()">🔄 Atualizar</button>
+        </div>
+    </div>
+""", unsafe_allow_html=True)
 
 # Barra lateral
 with st.sidebar:
@@ -464,21 +385,97 @@ with st.sidebar:
     
     st.markdown('</div>', unsafe_allow_html=True)
 
+# Função para criar menu expansível com ícones
+def create_expandable_menu(title, content_dict, icon):
+    with st.expander(f"{icon} {title}", expanded=False):
+        for category, files in content_dict.items():
+            st.markdown(f"### 📂 {category}")
+            for file in files:
+                if st.button(
+                    f"📄 {file.replace('.md', '').replace('_', ' ')}",
+                    key=f"btn_{title}_{category}_{file}",
+                    use_container_width=True,
+                    type="secondary"
+                ):
+                    st.session_state.current_file = file
+                    st.session_state.show_modal = True
+                    st.session_state.current_section = title
+                    st.session_state.current_category = category
+
 # Conteúdo principal
-if main_mode == "💊 Calculadoras":
-    st.markdown("""
-        <div class="content-card">
-            <h3>💊 Calculadoras Anestésicas</h3>
-            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
-                Ferramentas essenciais para cálculos precisos em anestesiologia veterinária
-            </p>
-        </div>
-    """, unsafe_allow_html=True)
-    render_calculator_interface()
+if main_mode == "📚 Material":
+    # Criar tabs para as seções principais
+    sections = list(CONTENT_STRUCTURE.keys())
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(sections)
+    
+    # Função para mostrar conteúdo da categoria
+    def show_category_content(categories):
+        for category, files in categories.items():
+            with st.expander(f"📂 {category}", expanded=False):
+                for file in files:
+                    if st.button(
+                        f"📄 {file.replace('.md', '').replace('_', ' ')}",
+                        key=f"btn_{category}_{file}",
+                        use_container_width=True
+                    ):
+                        st.session_state.current_file = file
+                        st.session_state.show_content = True
+                        return True
+        return False
+
+    # Mostrar conteúdo em cada tab
+    with tab1:
+        show_category_content(CONTENT_STRUCTURE[sections[0]])
+    with tab2:
+        show_category_content(CONTENT_STRUCTURE[sections[1]])
+    with tab3:
+        show_category_content(CONTENT_STRUCTURE[sections[2]])
+    with tab4:
+        show_category_content(CONTENT_STRUCTURE[sections[3]])
+    with tab5:
+        show_category_content(CONTENT_STRUCTURE[sections[4]])
+    with tab6:
+        show_category_content(CONTENT_STRUCTURE[sections[5]])
+
+    # Exibir conteúdo quando um arquivo é selecionado
+    if 'current_file' in st.session_state and st.session_state.get('show_content', False):
+        with st.container():
+            # Cabeçalho
+            st.markdown("---")
+            st.markdown(f"## 📄 {st.session_state.current_file.replace('.md', '').replace('_', ' ')}")
+            
+            # Botões de ação
+            col1, col2, col3, col4 = st.columns(4)
+            with col1:
+                if st.button("📝 Anotações"):
+                    st.session_state.show_notes = True
+            with col2:
+                if st.button("⭐ Favoritar"):
+                    user_manager.toggle_favorite(st.session_state.current_file)
+            with col3:
+                if st.button("🖨️ Imprimir"):
+                    st.markdown(f'<script>window.print()</script>', unsafe_allow_html=True)
+            with col4:
+                if st.button("❌ Fechar"):
+                    st.session_state.show_content = False
+                    st.experimental_rerun()
+            
+            # Conteúdo
+            content = read_markdown_file(st.session_state.current_file)
+            st.markdown(content)
+            
+            # Área de anotações
+            if st.session_state.get('show_notes', False):
+                with st.expander("📝 Suas Anotações", expanded=True):
+                    note = st.text_area("", key="note_text")
+                    if st.button("💾 Salvar"):
+                        user_manager.add_note(st.session_state.current_file, note)
+                        st.success("✅ Anotação salva com sucesso!")
+                        st.session_state.show_notes = False
 
 elif main_mode == "🧠 Flash Cards":
     st.markdown("""
-        <div class="content-card">
+        <div class="content-section">
             <h3>🧠 Flash Cards</h3>
             <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
                 Revise conceitos importantes de anestesiologia veterinária
@@ -503,7 +500,7 @@ elif main_mode == "🧠 Flash Cards":
         
         # Controles de navegação em container estilizado
         st.markdown("""
-            <div class="content-card" style="display: flex; gap: 1rem; align-items: center; justify-content: space-between;">
+            <div class="content-section" style="display: flex; gap: 1rem; align-items: center; justify-content: space-between;">
         """, unsafe_allow_html=True)
         
         cols = st.columns([1, 1, 1, 2])
@@ -530,7 +527,7 @@ elif main_mode == "🧠 Flash Cards":
         # Card atual
         current_card = all_cards[st.session_state.current_card_idx]
         st.markdown("""
-            <div class="content-card">
+            <div class="content-section">
                 <h3>📝 Questão</h3>
                 <div style="background: #F3F4F6; padding: 1.5rem; border-radius: 12px; color: var(--text); margin: 1rem 0;">
                     {}
@@ -540,7 +537,7 @@ elif main_mode == "🧠 Flash Cards":
         
         if st.button("👀 Mostrar Resposta", key=f"show_answer_{st.session_state.current_card_idx}", use_container_width=True):
             st.markdown("""
-                <div class="content-card">
+                <div class="content-section">
                     <h3>✅ Resposta</h3>
                     <div style="background: #ECFDF5; padding: 1.5rem; border-radius: 12px; color: var(--text); margin: 1rem 0;">
                         {}
@@ -553,7 +550,7 @@ elif main_mode == "🧠 Flash Cards":
 
 elif main_mode == "🏥 Casos":
     st.markdown("""
-        <div class="content-card">
+        <div class="content-section">
             <h3>🏥 Casos Clínicos</h3>
             <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
                 Estude casos reais de anestesiologia veterinária
@@ -635,7 +632,7 @@ elif main_mode == "🏥 Casos":
 
 else:  # Material de Estudo
     st.markdown("""
-        <div class="content-card">
+        <div class="content-section">
             <h3>📚 Material de Estudo</h3>
             <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
                 Conteúdo completo de anestesiologia veterinária
@@ -643,55 +640,26 @@ else:  # Material de Estudo
         </div>
     """, unsafe_allow_html=True)
     
-    for section_idx, (section, categories) in enumerate(CONTENT_STRUCTURE.items()):
-        st.markdown(f"""
-            <div class="content-card">
-                <h3>{section}</h3>
-            </div>
-        """, unsafe_allow_html=True)
-        
-        tabs = st.tabs([cat for cat in categories.keys()])
-        
-        for tab_idx, (tab, (category, files)) in enumerate(zip(tabs, categories.items())):
-            with tab:
-                if search:
-                    files = [f for f in files if search.lower() in f.lower() or 
-                            search.lower() in read_markdown_file(f).lower()]
-                
-                if not files:
-                    st.info(f"Nenhum conteúdo encontrado em {category}")
-                    continue
-                
-                cols = st.columns(2)
-                for idx, file in enumerate(files):
-                    with cols[idx % 2]:
-                        title = file.replace('.md', '').replace('_', ' ')
-                        if st.button(
-                            f"📄 {title}",
-                            key=f"btn_{section_idx}_{tab_idx}_{idx}",
-                            use_container_width=True,
-                            type="secondary"
-                        ):
-                            st.session_state.current_file = file
-                            st.session_state.show_content = True
-                
-                if 'current_file' in st.session_state and st.session_state.get('show_content', False):
-                    content = read_markdown_file(st.session_state.current_file)
-                    st.markdown("""
-                        <div class="content-card">
-                            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                                <button class="favorite-btn">⭐</button>
-                                <h3 style="margin: 0;">{}</h3>
-                            </div>
-                            <div style="color: var(--text);">
-                                {}
-                            </div>
-                        </div>
-                    """.format(
-                        st.session_state.current_file.replace('.md', '').replace('_', ' '),
-                        content
-                    ), unsafe_allow_html=True)
-                    
-                    if st.button("⭐", key=f"fav_{section_idx}_{tab_idx}", help="Favoritar"):
-                        user_manager.toggle_favorite(f"section_{section_idx}_{tab_idx}")
-                        st.success("Status de favorito atualizado!") 
+    # Criar menus expansíveis para cada seção
+    for section, categories in CONTENT_STRUCTURE.items():
+        create_expandable_menu(section, categories, "📁")
+
+    # Modal para exibir conteúdo
+    if 'show_modal' in st.session_state and st.session_state.show_modal:
+        modal_container = st.container()
+        with modal_container:
+            st.markdown("""
+                <div class="modal-overlay"></div>
+                <div class="modal">
+                    <button class="modal-close" onclick="this.closest('.modal').remove(); this.closest('.modal-overlay').remove();">×</button>
+            """, unsafe_allow_html=True)
+            
+            content = read_markdown_file(st.session_state.current_file)
+            st.markdown(f"## {st.session_state.current_file.replace('.md', '').replace('_', ' ')}")
+            st.markdown(content)
+            
+            if st.button("Fechar", key="close_modal"):
+                st.session_state.show_modal = False
+                st.experimental_rerun()
+            
+            st.markdown("</div>", unsafe_allow_html=True) 
