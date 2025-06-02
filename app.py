@@ -292,7 +292,7 @@ CONTENT_STRUCTURE = {
     },
     "🏥 Casos e Situações Especiais": {
         "Casos Clínicos": ["Casos_Clinicos_ENADE.md"],
-        "Pacientes Especiais": ["Anestesia_Pacientes_Especiais.md"],
+        "Pacientes Especiais": ["Anestesia_Pacientes_Especiais.md", "Piometra.md"],
         "Emergências": ["RCP_Legislacao.md"]
     },
     "🎯 Material de Estudo": {
@@ -458,7 +458,7 @@ if main_mode == "📚 Material":
             with col4:
                 if st.button("❌ Fechar"):
                     st.session_state.show_content = False
-                    st.experimental_rerun()
+                    st.rerun()
             
             # Conteúdo
             content = read_markdown_file(st.session_state.current_file)
@@ -660,6 +660,6 @@ else:  # Material de Estudo
             
             if st.button("Fechar", key="close_modal"):
                 st.session_state.show_modal = False
-                st.experimental_rerun()
+                st.rerun()
             
             st.markdown("</div>", unsafe_allow_html=True) 
